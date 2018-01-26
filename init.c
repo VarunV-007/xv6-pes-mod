@@ -1,9 +1,17 @@
 // init: The initial user-level program
 
+/**/
+//Code written within these indicates our changes made to the original
+/**/
+
 #include "types.h"
 #include "stat.h"
 #include "user.h"
 #include "fcntl.h"
+
+/**/
+#include "password.c"
+/**/
 
 char *argv[] = { "sh", 0 };
 
@@ -18,6 +26,10 @@ main(void)
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+  /**/
+  verify();
+  /**/
 
   for(;;){
     printf(1, "init: starting sh\n");
