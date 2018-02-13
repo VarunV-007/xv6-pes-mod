@@ -89,3 +89,38 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+#define CRTPORT 0x3d4
+
+int
+sys_clear(void)
+{
+  // clearing qemu terminal
+
+  static ushort *crt = (ushort*)P2V(0xb8000);
+  
+  // register 14 and 15 hold the cursor position as 14 bits
+  // to read/write, the index of the register is written to CRTPORT
+  // then read/write is issued on CRTPORT + 1
+  
+  // clearing the memory
+
+  memset(crt, 0, sizeof(crt[0]) * 25 * 80);	// cga memory (25 X 80) default.
+
+  // writing the position of cursor
+
+  int pos = 0;
+  outb(CRTPORT, 14);
+  outb(CRTPORT+1, pos>>8);
+  outb(CRTPORT, 15);
+  outb(CRTPORT+1, pos);
+
+  // clearing the diplay on serial port
+  // uartputc prints a character on the display on the serial port
+
+  char *ctrl_seq = "\033[2J\033[H";
+  int i;
+  for (i = 0; ctrl_seq[i]; ++i)  uartputc(ctrl_seq[i]);
+  
+  return 0;
+}
